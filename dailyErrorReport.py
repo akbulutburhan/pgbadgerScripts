@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import subprocess
 
@@ -24,7 +26,6 @@ def getLogDir():
     processLogDir = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     outLogDir, errLogDir = processLogDir.communicate()
     listLogDir = list(outLogDir.splitlines()[1].decode().split())
-    print(listLogDir[-2] + "/" + listLogDir[-1].split("/")[0] + "/")
     return listLogDir[-2] + "/" + listLogDir[-1].split("/")[0] + "/"
 
 
@@ -44,8 +45,13 @@ def getDate():
     return outToday[:-1].decode()
 
 
-def executePgbadger(prefix, hostname, logdir, errordir, logfile, today):
-    cmd = "/usr/bin/pgbadger --prefix '" + prefix + "' -w --outfile " + errordir + "/pgbadger-" + today + "-" + hostname + "-Errors.html " + logdir + logfile
+def getParameter():
+    parameters = ["w", "q"]     # these parameter for only error in quiet mode (don't print anything to stdout)
+    return " ".join(map(lambda x: " -" + x, parameters))
+
+
+def executePgbadger(prefix,parameter, hostname, logdir, errordir, logfile, today):
+    cmd = "/usr/bin/pgbadger --prefix '" + prefix + "' "+ parameter +" --outfile " + errordir + "/pgbadger-" + today + "-" + hostname + "-Errors.html " + logdir + logfile
 
     processLogDir = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     outLogDir, errLogDir = processLogDir.communicate()
@@ -62,9 +68,10 @@ def main():
         logPrefix = getPrefix()
         hostName = getHostName()
         logDirectory = getLogDir()
-        todayDate = getDate()
         lastLogFile = getLastLogFile(logDirectory)
-        executePgbadger(logPrefix, hostName, logDirectory, pgbadgerErrorFolder, lastLogFile, todayDate)
+        todayDate = getDate()
+        parameter = getParameter()
+        executePgbadger(logPrefix, parameter, hostName, logDirectory, pgbadgerErrorFolder, lastLogFile, todayDate)
 
 
 if __name__ == "__main__":
