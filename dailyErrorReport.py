@@ -7,9 +7,10 @@ import subprocess
 def getPrefix():
     cmd = "psql -c 'show log_line_prefix;'"
 
-    processPrefix = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    processPrefix = subprocess.Popen(cmd, shell=True,universal_newlines=True,  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     outPrefix, errPrefix = processPrefix.communicate()
-    return outPrefix.splitlines()[2].decode()[1:-1]
+    prefix_index = [index+2 for index, value in enumerate(outPrefix.splitlines()) if 'log_line_prefix' in value]
+    return outPrefix.splitlines()[prefix_index[0]][1:-1]
 
 
 def getHostName():
